@@ -21,6 +21,8 @@ def get_private_key(key_path: str) -> bytes:
         ValueError: 秘密鍵ファイルの形式が不正な場合
         Exception: その他のエラーが発生した場合
     """
+    import logging
+    logger = logging.getLogger(__name__)
     try:
         with open(key_path, 'rb') as key_file:
             key_data = key_file.read()
@@ -31,16 +33,16 @@ def get_private_key(key_path: str) -> bytes:
                     backend=default_backend()
                 )
             except ValueError as e:
-                print(f"秘密鍵ファイルの形式が不正です: {e}")
+                logger.error(f"秘密鍵ファイルの形式が不正です: {e}")
                 raise
     except FileNotFoundError:
-        print(f"秘密鍵ファイルが見つかりません: {key_path}")
+        logger.error(f"秘密鍵ファイルが見つかりません: {key_path}")
         raise
     except PermissionError:
-        print(f"秘密鍵ファイルへのアクセス権がありません: {key_path}")
+        logger.error(f"秘密鍵ファイルへのアクセス権がありません: {key_path}")
         raise
     except Exception as e:
-        print(f"秘密鍵の読み込み中に予期せぬエラーが発生しました: {e}")
+        logger.error(f"秘密鍵の読み込み中に予期せぬエラーが発生しました: {e}")
         raise
 
 def get_access_token(private_key: bytes) -> str:
@@ -50,8 +52,10 @@ def get_access_token(private_key: bytes) -> str:
         private_key: 秘密鍵データ
 
     Returns:
-        str: アクセストークン
+        str: アクセストークン。エラー時はNone
     """
+    import logging
+    logger = logging.getLogger(__name__)
     # JWTペイロード作成
     now = int(time.time())
     payload = {
@@ -80,5 +84,8 @@ def get_access_token(private_key: bytes) -> str:
         response.raise_for_status()  # エラーレスポンスの場合は例外を発生
         return response.json()['access_token']
     except requests.RequestException as e:
-        print(f"トークン取得に失敗しました: {e}")
+        logger.error(f"トークン取得に失敗しました: {e}")
+        return None
+    except KeyError as e:
+        logger.error(f"トークン取得のレスポンスが不正です: {e}")
         return None
