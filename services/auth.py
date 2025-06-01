@@ -4,16 +4,19 @@ import time
 import requests
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.backends import default_backend
-from config.settings import CLIENT_ID, SERVICE_ACCOUNT, CLIENT_SECRET, AUTH_URL
+from typing import Optional, Any
 
-def get_private_key(key_path: str) -> bytes:
+from config.settings import CLIENT_ID, SERVICE_ACCOUNT, CLIENT_SECRET, AUTH_URL
+from .logger import logger
+
+def get_private_key(key_path: str) -> Optional[Any]:
     """秘密鍵ファイルを読み込み、秘密鍵オブジェクトを返します。
 
     Args:
         key_path (str): 秘密鍵ファイルのパス
 
     Returns:
-        bytes: 読み込んだ秘密鍵オブジェクト
+        Optional[Any]: 読み込んだ秘密鍵オブジェクト、エラー時はNone
 
     Raises:
         FileNotFoundError: 秘密鍵ファイルが見つからない場合
@@ -21,8 +24,6 @@ def get_private_key(key_path: str) -> bytes:
         ValueError: 秘密鍵ファイルの形式が不正な場合
         Exception: その他のエラーが発生した場合
     """
-    import logging
-    logger = logging.getLogger(__name__)
     try:
         with open(key_path, 'rb') as key_file:
             key_data = key_file.read()
@@ -45,17 +46,15 @@ def get_private_key(key_path: str) -> bytes:
         logger.error(f"秘密鍵の読み込み中に予期せぬエラーが発生しました: {e}")
         raise
 
-def get_access_token(private_key: bytes) -> str:
+def get_access_token(private_key: Any) -> Optional[str]:
     """JWTトークンを生成し、アクセストークンを取得します。
 
     Args:
         private_key: 秘密鍵データ
 
     Returns:
-        str: アクセストークン。エラー時はNone
+        Optional[str]: アクセストークン。エラー時はNone
     """
-    import logging
-    logger = logging.getLogger(__name__)
     # JWTペイロード作成
     now = int(time.time())
     payload = {

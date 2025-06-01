@@ -7,6 +7,8 @@ LINEWORKSのBot APIを使用してメッセージを送信するためのPython�
 - JWT認証を使用したアクセストークンの取得
 - ボットメッセージの送信
 - エラーハンドリングとログ出力
+- シングルトンパターンを実装したロガー
+- 柔軟なAPIクライアント
 
 ## 必要要件
 
@@ -45,10 +47,14 @@ BOT_ID=your_bot_id
 基本的な使用例:
 
 ```python
-from main import main
+from lineworks_bot import send_bot_message
 
 # メッセージを送信
-send_bot_message(user_id='user@example.com', message='Hello, LINEWORKS!')
+result = send_bot_message(user_id='user@example.com', message='Hello, LINEWORKS!')
+if result:
+    print("送信成功")
+else:
+    print("送信失敗")
 ```
 
 ## プロジェクト構造
@@ -59,7 +65,16 @@ send_bot_message(user_id='user@example.com', message='Hello, LINEWORKS!')
 │   └── settings.py    # 設定関連
 ├── services/
 │   ├── auth.py        # 認証関連
+│   ├── api.py         # API通信関連
+│   ├── logger.py      # ログ関連
 │   └── message.py     # メッセージ送信関連
+├── logs/              # ログファイル格納ディレクトリ
+├── tests/             # テストコード
+│   └── unit/
+│       ├── test_auth.py
+│       ├── test_api.py
+│       ├── test_logger.py
+│       └── test_message.py
 └── main.py            # メインスクリプト
 ```
 
